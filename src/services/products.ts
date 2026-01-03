@@ -25,13 +25,13 @@ export async function searchProducts(params: SearchProductsParams): Promise<Prod
   const { q, limit = 10 } = params;
   
   // Skip API call for empty or whitespace-only search
-  const trimmedQuery = q.trim();
-  if (!trimmedQuery) {
+  // Note: Caller (useProductSearch) already trims, but we validate here for safety
+  if (!q || !q.trim()) {
     return [];
   }
   
   const response = await api.get<APIResponse<Product[]>>('/products/search', {
-    params: { q: trimmedQuery, limit },
+    params: { q, limit },
   });
   
   return response.data.data;

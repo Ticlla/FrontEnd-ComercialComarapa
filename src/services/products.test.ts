@@ -29,11 +29,11 @@ describe('searchProducts', () => {
       expect(api.get).not.toHaveBeenCalled();
     });
 
-    it('trims whitespace before making API call', async () => {
+    it('passes search term as-is to API (trimming is caller responsibility)', async () => {
       const mockResponse = { data: { data: [] } };
       vi.mocked(api.get).mockResolvedValue(mockResponse);
 
-      await searchProducts({ q: '  arroz  ' });
+      await searchProducts({ q: 'arroz' });
 
       expect(api.get).toHaveBeenCalledWith('/products/search', {
         params: { q: 'arroz', limit: 10 },
