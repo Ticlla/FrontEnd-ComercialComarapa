@@ -39,9 +39,10 @@ export function SearchResultItem({
     <div
       role="option"
       aria-selected={isSelected}
-      tabIndex={0}
+      tabIndex={isSelected ? 0 : -1}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      data-index={isSelected ? 'selected' : undefined}
       className={`
         flex items-center gap-3 px-4 py-3 cursor-pointer
         transition-colors duration-150

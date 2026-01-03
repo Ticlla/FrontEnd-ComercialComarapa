@@ -51,6 +51,14 @@ export function SearchBar({
     }
   }, [debouncedTerm]);
 
+  // Scroll selected item into view when navigating with keyboard
+  useEffect(() => {
+    if (selectedIndex >= 0) {
+      const selectedEl = containerRef.current?.querySelector('[aria-selected="true"]');
+      selectedEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [selectedIndex]);
+
   // Handle click outside to close
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -79,7 +87,8 @@ export function SearchBar({
   // Handle product selection
   const handleProductClick = useCallback((product: Product) => {
     onProductSelect?.(product);
-    // For now, just show an alert (per PRD - product detail is future phase)
+    // TODO: Replace alert with product detail modal/page (PRD Phase 1.2)
+    // For now, show alert as placeholder per PRD-001 Section 7 (Out of Scope)
     alert(`Producto seleccionado: ${product.name}\nSKU: ${product.sku}\nPrecio: Bs. ${product.unit_price}`);
     handleClear();
   }, [onProductSelect, handleClear]);
