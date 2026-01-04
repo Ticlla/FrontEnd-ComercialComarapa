@@ -43,14 +43,6 @@ export function SearchBar({
     debouncedTerm,
   } = useProductSearch(searchTerm);
 
-  // Open results when we have a search term
-  useEffect(() => {
-    if (debouncedTerm) {
-      setIsOpen(true);
-      setSelectedIndex(-1);
-    }
-  }, [debouncedTerm]);
-
   // Scroll selected item into view when navigating with keyboard
   useEffect(() => {
     if (selectedIndex >= 0) {
@@ -71,9 +63,18 @@ export function SearchBar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle input change
+  // Handle input change - open dropdown immediately when user types
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    // Open dropdown when user starts typing, close when empty
+    if (value.trim()) {
+      setIsOpen(true);
+      setSelectedIndex(-1);
+    } else {
+      setIsOpen(false);
+    }
   };
 
   // Clear search

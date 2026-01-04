@@ -4,11 +4,32 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useProductSearch } from './useProductSearch';
 import * as productsService from '../services/products';
 import type { ReactNode } from 'react';
+import type { Product } from '../types/product';
 
 // Mock the products service
 vi.mock('../services/products', () => ({
   searchProducts: vi.fn(),
 }));
+
+// Helper to create mock products with all required fields
+function createMockProduct(overrides: Partial<Product> = {}): Product {
+  return {
+    id: '1',
+    sku: 'TEST-001',
+    name: 'Test Product',
+    description: null,
+    category_id: null,
+    unit_price: '10.00',
+    cost_price: null,
+    current_stock: 50,
+    min_stock_level: 10,
+    is_active: true,
+    created_at: '2026-01-01T00:00:00Z',
+    updated_at: '2026-01-01T00:00:00Z',
+    category: null,
+    ...overrides,
+  };
+}
 
 // Create a wrapper with QueryClient
 function createWrapper() {
@@ -68,10 +89,10 @@ describe('useProductSearch', () => {
   });
 
   it('calls API with search term (no debounce)', async () => {
-    const mockProducts = [
-      { id: '1', name: 'Arroz', sku: 'ARR-001' },
+    const mockProducts: Product[] = [
+      createMockProduct({ id: '1', name: 'Arroz', sku: 'ARR-001' }),
     ];
-    vi.mocked(productsService.searchProducts).mockResolvedValue(mockProducts as any);
+    vi.mocked(productsService.searchProducts).mockResolvedValue(mockProducts);
 
     const { result } = renderHook(
       () => useProductSearch('arroz', { debounceMs: 0 }),

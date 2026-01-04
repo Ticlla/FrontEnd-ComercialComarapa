@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { getErrorMessage } from './api';
-import { AxiosError } from 'axios';
+import { AxiosHeaders, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+
+// Minimal mock config for tests
+const mockConfig: InternalAxiosRequestConfig = {
+  headers: new AxiosHeaders(),
+};
 
 // Helper to create mock AxiosError
 function createAxiosError(
@@ -14,11 +19,11 @@ function createAxiosError(
     status,
     statusText: 'Error',
     headers: {},
-    config: {} as any,
+    config: mockConfig,
     data,
   };
   error.code = code;
-  error.config = {} as any;
+  error.config = mockConfig;
   return error;
 }
 
@@ -74,7 +79,7 @@ describe('getErrorMessage', () => {
       const error = new Error('Network Error') as AxiosError;
       error.isAxiosError = true;
       error.code = 'ERR_NETWORK';
-      error.config = {} as any;
+      error.config = mockConfig;
       
       expect(getErrorMessage(error)).toBe('Error de conexión. Verifica tu conexión a internet.');
     });
@@ -83,7 +88,7 @@ describe('getErrorMessage', () => {
       const error = new Error('Timeout') as AxiosError;
       error.isAxiosError = true;
       error.code = 'ECONNABORTED';
-      error.config = {} as any;
+      error.config = mockConfig;
       
       expect(getErrorMessage(error)).toBe('La solicitud tardó demasiado. Intenta de nuevo.');
     });
