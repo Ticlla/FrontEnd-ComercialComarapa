@@ -53,9 +53,19 @@ export function SearchResultItem({
 
       {/* Product Info */}
       <div className="flex-1 min-w-0">
-        {/* Product Name */}
-        <div className="font-medium text-[var(--color-text)] truncate">
-          {product.name}
+        {/* Product Name & Relevance Badge */}
+        <div className="flex items-center gap-2">
+          <div className="font-medium text-[var(--color-text)] truncate">
+            {product.name}
+          </div>
+          {product.relevance !== undefined && product.relevance < 0.4 && (
+            <span 
+              className="flex-shrink-0 px-1.5 py-0.5 text-[10px] font-bold uppercase rounded bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
+              title="Resultado aproximado (posible error tipográfico)"
+            >
+              Sugerencia
+            </span>
+          )}
         </div>
         
         {/* SKU, Price, Category */}

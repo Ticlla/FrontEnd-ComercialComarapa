@@ -33,6 +33,8 @@ export interface Product {
   created_at: string;
   updated_at: string;
   category: Category | null;
+  /** Added: FTS/Similarity ranking score from search results */
+  relevance?: number;
 }
 
 // =============================================================================

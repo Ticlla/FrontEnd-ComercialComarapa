@@ -1,54 +1,63 @@
 # Frontend Implementation: Enhanced Search System
 
-This document details the frontend considerations for the enhanced search system. While the backend handles the search logic, the frontend can be optimized to provide a better user experience with the new capabilities.
+This document details the frontend implementation for the enhanced search system, optimizing for the new Hybrid Search (FTS + Trigrams) backend.
 
-## 🎨 UI/UX Enhancements
+## 🏗️ Architecture Summary
 
-### 1. Relevance Feedback (Optional)
-The new search function returns a `relevance` score (0 to 1.0). We can use this to visually distinguish between an exact match and a fuzzy "best guess".
-
-**Implementation:**
-- If `relevance > 0.8`: Show as a standard result.
-- If `0.3 < relevance < 0.5`: Consider adding a subtle "Suggested" badge.
-
-### 2. Typo Highlighting (Future)
-Since we now support typo tolerance, we can implement highlighting that shows which part of the word matched the query, even if it wasn't an exact match.
+The frontend leverages the refined backend API to provide a typo-tolerant, relevance-ranked search experience. Key updates focus on type safety for relevance scores and UI feedback for fuzzy matches.
 
 ---
 
 ## ⚙️ Technical Integration
 
 ### 1. API Types Update
-Update the product type to optionally include the relevance score returned by the new search function.
+The backend now returns a `relevance` score (0.0 to 1.0) for each search result.
 
 **Location**: `FrontEnd-CC/src/types/product.ts`
-
 ```typescript
 export interface Product {
   // ... existing fields
-  relevance?: number; // Optional score from search results
+  relevance?: number; // Added: FTS/Similarity ranking score
 }
 ```
 
-### 2. Search Hook (`useProductSearch.ts`)
-No logic changes are required in the hook, as the API endpoint `/api/v1/products/search` remains the same. The backend will automatically start returning better results once the RPC is integrated.
+### 2. Search Hook & Performance
+Because Hybrid Search is more computationally expensive than simple pattern matching, we ensure efficient query triggering.
+
+**Location**: `FrontEnd-CC/src/hooks/useProductSearch.ts`
+- **Debounce**: 300ms (standard) to 500ms (conservative) to prevent database thrashing.
+- **Min Length**: Guard against queries < 2 characters to avoid large result sets.
+
+---
+
+## 🎨 UI/UX Refinements
+
+### 1. Relevance Feedback
+We can visually distinguish between high-confidence matches and fuzzy "suggestions".
+
+**Implementation Strategy:**
+- **High Confidence (`relevance > 0.7`)**: Standard display.
+- **Low Confidence (`relevance < 0.4`)**: Add a subtle "Suggested" badge or use slightly dimmed text for the name to indicate a fuzzy match.
+
+### 2. Search Empty State
+When the search returns no results, the typo tolerance means we've checked for similar terms too.
+- **UI Message**: "No exact matches found. Try a different term."
 
 ---
 
 ## 🧪 Frontend Verification
 
 ### 1. Manual Verification Steps
-1. **Typo Test**: Search for "aciete" and verify "Aceite" appears in the dropdown.
+1. **Typo Test**: Search for "aciete" and verify "Aceite" appears in the results.
 2. **Accent Test**: Search for "azucar" and verify "Azúcar" appears.
-3. **Category Test**: Search for "lacteos" and verify dairy products appear.
-4. **Empty Search**: Verify that clearing the search bar closes the results dropdown immediately.
+3. **Ranking Test**: Search for a term that has both exact and fuzzy matches; verify exact matches appear first.
+4. **Empty State**: Verify that clearing the search bar removes all results immediately.
 
 ---
 
 ## 📋 Frontend Checklist
 
-- [ ] (Optional) Update `Product` interface to include `relevance`.
+- [x] Update `Product` interface to include `relevance`.
 - [ ] Verify `SearchBar` correctly displays results with different match types.
-- [ ] Confirm that `isLoading` states still function correctly with the slightly more complex backend query.
-
-
+- [ ] Ensure debounce timing is optimized for hybrid search.
+- [ ] (Optional) Implement `RelevanceBadge` for fuzzy matches.

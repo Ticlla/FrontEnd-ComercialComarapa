@@ -67,7 +67,7 @@ export function useProductSearch(
   const {
     limit = 10,
     debounceMs = 300,
-    minChars = 1,
+    minChars = 2, // Guard against queries < 2 chars for better FTS/Trigram performance
     enabled = true,
   } = options;
 
