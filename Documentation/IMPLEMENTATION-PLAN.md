@@ -1,8 +1,12 @@
-# Frontend Implementation Plan - Phase 1
+# Frontend Implementation Plan
 
-**Project:** Comercial Comarapa - Product Search Interface  
-**Version:** 1.0  
-**Date:** January 3, 2026  
+**Project:** Comercial Comarapa - Inventory Management Frontend  
+**Version:** 1.1  
+**Last Updated:** January 3, 2026  
+
+---
+
+# Phase 1: Product Search Interface ✅
 
 ---
 
@@ -285,12 +289,197 @@ http://localhost:3000
 
 ---
 
-## Next Phase (Out of Scope)
+# Phase 2: Product Detail Modal
 
-- Product detail modal/page
+**Status:** Planned  
+**Estimated Time:** 4-5 hours  
+
+---
+
+## Overview
+
+When a user clicks on a product in search results, display a modal with full product details including stock information, pricing, and category.
+
+### User Story
+> As a store clerk, I want to click on a search result to see full product details so I can verify pricing and stock before assisting a customer.
+
+---
+
+## M8: Product Detail Modal (Est: 4-5 hours)
+
+### M8.1: Modal Infrastructure
+| Task | File | Description |
+|------|------|-------------|
+| M8.1.1 | `src/components/ui/Modal.tsx` | Reusable modal component with backdrop, close button, ESC key |
+| M8.1.2 | `src/hooks/useModal.ts` | Hook for modal open/close state management |
+| M8.1.3 | `src/components/ui/index.ts` | Export modal components |
+
+**Modal Component Props:**
+```typescript
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  size?: 'sm' | 'md' | 'lg';
+  children: ReactNode;
+}
+```
+
+### M8.2: Product Detail Component
+| Task | File | Description |
+|------|------|-------------|
+| M8.2.1 | `src/components/product/ProductDetailModal.tsx` | Main product detail modal |
+| M8.2.2 | `src/components/product/ProductInfo.tsx` | Product name, SKU, description |
+| M8.2.3 | `src/components/product/ProductPricing.tsx` | Unit price, cost price, margin |
+| M8.2.4 | `src/components/product/ProductStock.tsx` | Stock level, status, min level |
+| M8.2.5 | `src/components/product/index.ts` | Barrel exports |
+
+**Component Hierarchy:**
+```
+ProductDetailModal
+├── Modal
+│   ├── ModalHeader
+│   │   ├── Title (Product Name)
+│   │   └── CloseButton
+│   └── ModalBody
+│       ├── ProductInfo
+│       │   ├── SKU Badge
+│       │   ├── Category Badge
+│       │   └── Description
+│       ├── ProductPricing
+│       │   ├── Unit Price (large)
+│       │   ├── Cost Price (if available)
+│       │   └── Profit Margin %
+│       └── ProductStock
+│           ├── Stock Level (with indicator)
+│           ├── Min Stock Level
+│           └── Stock Status Message
+```
+
+### M8.3: API Integration
+| Task | File | Description |
+|------|------|-------------|
+| M8.3.1 | `src/services/products.ts` | Already has `getProductById()` ✅ |
+| M8.3.2 | `src/hooks/useProduct.ts` | React Query hook for single product |
+
+**useProduct Hook:**
+```typescript
+function useProduct(productId: string | null) {
+  return {
+    data: Product | undefined,
+    isLoading: boolean,
+    isError: boolean,
+    error: Error | null
+  }
+}
+```
+
+### M8.4: Integration with Search
+| Task | File | Description |
+|------|------|-------------|
+| M8.4.1 | Update `SearchBar.tsx` | Replace alert with modal open |
+| M8.4.2 | Update `SearchPage.tsx` | Add modal state and render |
+
+---
+
+## Design Specifications
+
+### Modal Layout
+```
+┌─────────────────────────────────────────────┐
+│  [X] Product Name                           │
+├─────────────────────────────────────────────┤
+│                                             │
+│  SKU: ARR-001        Category: Alimentos    │
+│                                             │
+│  ─────────────────────────────────────────  │
+│                                             │
+│  Description text goes here if available... │
+│                                             │
+│  ─────────────────────────────────────────  │
+│                                             │
+│       Bs. 25.00                             │
+│       Unit Price                            │
+│                                             │
+│  Cost: Bs. 18.00    Margin: 28%             │
+│                                             │
+│  ─────────────────────────────────────────  │
+│                                             │
+│  Stock: 45 units    ● In Stock              │
+│  Min Level: 10                              │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+### Stock Status Display
+| Status | Color | Message |
+|--------|-------|---------|
+| In Stock | 🟢 Green | "In Stock" |
+| Low Stock | 🟡 Yellow | "Low Stock - Reorder Soon" |
+| Out of Stock | 🔴 Red | "Out of Stock" |
+
+### Keyboard Shortcuts
+- `ESC` - Close modal
+- Click backdrop - Close modal
+
+---
+
+## File Structure (Phase 2 Additions)
+
+```
+src/
+├── components/
+│   ├── product/          # NEW
+│   │   ├── ProductDetailModal.tsx
+│   │   ├── ProductInfo.tsx
+│   │   ├── ProductPricing.tsx
+│   │   ├── ProductStock.tsx
+│   │   └── index.ts
+│   └── ui/
+│       ├── Modal.tsx     # NEW
+│       ├── Logo.tsx
+│       └── index.ts
+├── hooks/
+│   ├── useModal.ts       # NEW
+│   ├── useProduct.ts     # NEW
+│   ├── useProductSearch.ts
+│   └── useDebounce.ts
+```
+
+---
+
+## Success Criteria (Phase 2)
+
+- [ ] Modal opens when clicking search result
+- [ ] Modal displays all product information
+- [ ] ESC key closes modal
+- [ ] Click outside closes modal
+- [ ] Loading state while fetching product
+- [ ] Error state if product fetch fails
+- [ ] Profit margin calculated correctly
+- [ ] Stock status colors match design
+- [ ] Responsive on mobile/tablet/desktop
+- [ ] Unit tests for new components
+
+---
+
+## Implementation Order
+
+```
+M8.1.2 → M8.1.1 → M8.3.2 → M8.2.2 → M8.2.3 → M8.2.4 → M8.2.1 → M8.4.1 → M8.4.2
+   ↓        ↓        ↓        ↓        ↓        ↓        ↓        ↓        ↓
+useModal → Modal → useProduct → Info → Pricing → Stock → Detail → SearchBar → Page
+```
+
+---
+
+# Future Phases (Out of Scope)
+
 - Category filters
 - Price range filters
 - Search history
 - Barcode scanning
+- Inventory management (add/edit stock)
+- User authentication
 
 
