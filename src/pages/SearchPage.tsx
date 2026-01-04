@@ -1,5 +1,7 @@
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Logo } from '../components/ui/Logo';
 import { SearchBar } from '../components/search';
+import { ProductDetailModal } from '../components/product';
 import type { Product } from '../types/product';
 
 /**
@@ -7,10 +9,36 @@ import type { Product } from '../types/product';
  * This is the primary interface for store staff to search products.
  */
 export function SearchPage() {
-  const handleProductSelect = (product: Product) => {
-    // Future: Navigate to product detail or open modal
-    console.log('Product selected:', product);
-  };
+  // Modal state
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Ref for cleanup timeout
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle product selection from search
+  const handleProductSelect = useCallback((product: Product) => {
+    setSelectedProductId(product.id);
+    setIsModalOpen(true);
+  }, []);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+    // Clear product ID after modal close animation completes
+    closeTimeoutRef.current = setTimeout(() => {
+      setSelectedProductId(null);
+    }, 200);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
@@ -38,10 +66,15 @@ export function SearchPage() {
       <footer className="py-4 text-center text-xs text-[var(--color-text-secondary)]">
         <p>Comercial Comarapa © {new Date().getFullYear()}</p>
       </footer>
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal
+        productId={selectedProductId}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+      />
     </div>
   );
 }
 
 export default SearchPage;
-
-

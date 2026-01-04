@@ -87,11 +87,8 @@ export function SearchBar({
   // Handle product selection
   const handleProductClick = useCallback((product: Product) => {
     onProductSelect?.(product);
-    // TODO: Replace alert with product detail modal/page (PRD Phase 1.2)
-    // For now, show alert as placeholder per PRD-001 Section 7 (Out of Scope)
-    alert(`Producto seleccionado: ${product.name}\nSKU: ${product.sku}\nPrecio: Bs. ${product.unit_price}`);
-    handleClear();
-  }, [onProductSelect, handleClear]);
+    setIsOpen(false);
+  }, [onProductSelect]);
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {

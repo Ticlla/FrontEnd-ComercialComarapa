@@ -1,20 +1,12 @@
 import { Package } from 'lucide-react';
 import { StockIndicator } from './StockIndicator';
+import { formatPrice } from '../../lib/formatters';
 import type { Product } from '../../types/product';
 
 interface SearchResultItemProps {
   product: Product;
   onClick?: (product: Product) => void;
   isSelected?: boolean;
-}
-
-/**
- * Format price in Bolivianos (Bs.)
- * Handles both number and string inputs (backend returns decimal as string)
- */
-function formatPrice(price: number | string): string {
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  return `Bs. ${numPrice.toFixed(2)}`;
 }
 
 /**
