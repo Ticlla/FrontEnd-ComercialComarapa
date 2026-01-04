@@ -1,7 +1,7 @@
-# Frontend Implementation Plan - Phase 1
+# Frontend Implementation Plan
 
 **Project:** Comercial Comarapa - Product Search Interface  
-**Version:** 1.1  
+**Version:** 1.2  
 **Date:** January 3, 2026  
 **Last Updated:** January 3, 2026  
 
@@ -12,14 +12,16 @@
 | Milestone | Status | Completion |
 |-----------|--------|------------|
 | M1: Project Configuration | ✅ Complete | 100% |
-| M2: API Layer | ⏳ Pending | 0% |
-| M3: Custom Hooks | ⏳ Pending | 0% |
-| M4: Search Components | ⏳ Pending | 0% |
-| M5: Search Page | ⏳ Pending | 0% |
-| M6: Styling & Polish | ⏳ Pending | 0% |
-| M7: Testing & Integration | ⏳ Pending | 0% |
+| M2: API Layer | ✅ Complete | 100% |
+| M3: Custom Hooks | ✅ Complete | 100% |
+| M4: Search Components | ✅ Complete | 100% |
+| M5: Search Page | ✅ Complete | 100% |
+| M6: Styling & Polish | ✅ Complete | 100% |
+| M7: Testing & Integration | ✅ Complete | 100% |
+| **M8: Product Detail Modal** | ⏳ Pending | 0% |
 
-**Overall Progress:** 1/7 milestones (14%)
+**Phase 1 Progress:** 7/7 milestones ✅ Complete  
+**Phase 2 Progress:** 0/1 milestones (0%)
 
 ---
 
@@ -72,8 +74,8 @@ interface ProductResponse {
   name: string;
   description: string | null;
   category_id: string | null;
-  unit_price: number;
-  cost_price: number | null;
+  unit_price: string;      // PostgreSQL decimal → string
+  cost_price: string | null;  // PostgreSQL decimal → string
   current_stock: number;
   min_stock_level: number;
   is_active: boolean;
@@ -153,13 +155,100 @@ SearchPage
 | M6.6 | Empty/error states |
 | M6.7 | Keyboard navigation (Escape to close) |
 
-### M7: Testing & Integration (Est: 1 hour)
-| Task | Description |
-|------|-------------|
-| M7.1 | Test with backend running |
-| M7.2 | Test responsive behavior |
-| M7.3 | Test edge cases (empty search, no results, errors) |
-| M7.4 | Performance check (debounce working) |
+### M7: Testing & Integration ✅
+| Task | Description | Status |
+|------|-------------|--------|
+| M7.1 | Test with backend running | ✅ |
+| M7.2 | Test responsive behavior | ✅ |
+| M7.3 | Test edge cases (empty search, no results, errors) | ✅ |
+| M7.4 | Performance check (debounce working) | ✅ |
+| M7.5 | Unit tests (44 tests passing) | ✅ |
+
+---
+
+### M8: Product Detail Modal (Est: 4-5 hours) ⏳
+
+**User Story:**
+> As a store clerk, I want to click on a search result to see full product details so I can verify pricing and stock before assisting a customer.
+
+| Task | File | Description |
+|------|------|-------------|
+| M8.1 | `src/components/ui/Modal.tsx` | Reusable modal with backdrop, ESC key close |
+| M8.2 | `src/hooks/useModal.ts` | Hook for modal open/close state |
+| M8.3 | `src/hooks/useProduct.ts` | React Query hook for single product fetch |
+| M8.4 | `src/components/product/ProductDetailModal.tsx` | Main product detail modal |
+| M8.5 | `src/components/product/ProductInfo.tsx` | SKU, category, description display |
+| M8.6 | `src/components/product/ProductPricing.tsx` | Unit price, cost price, margin |
+| M8.7 | `src/components/product/ProductStock.tsx` | Stock level with status indicator |
+| M8.8 | `src/components/product/index.ts` | Barrel exports |
+| M8.9 | Update `SearchBar.tsx` | Replace alert with modal open |
+| M8.10 | Update `SearchPage.tsx` | Add modal state and render |
+
+**Modal Component Props:**
+```typescript
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  size?: 'sm' | 'md' | 'lg';
+  children: ReactNode;
+}
+```
+
+**useProduct Hook:**
+```typescript
+function useProduct(productId: string | null) {
+  return {
+    data: Product | undefined,
+    isLoading: boolean,
+    isError: boolean,
+    error: Error | null
+  }
+}
+```
+
+**Component Hierarchy:**
+```
+ProductDetailModal
+├── Modal
+│   ├── ModalHeader (Product Name + Close Button)
+│   └── ModalBody
+│       ├── ProductInfo (SKU, Category, Description)
+│       ├── ProductPricing (Unit Price, Cost, Margin %)
+│       └── ProductStock (Stock Level, Min Level, Status)
+```
+
+**Modal Layout:**
+```
+┌─────────────────────────────────────────────┐
+│  Product Name                           [X] │
+├─────────────────────────────────────────────┤
+│                                             │
+│  SKU: ARR-001        Category: Alimentos    │
+│                                             │
+│  Description text goes here if available... │
+│                                             │
+│  ─────────────────────────────────────────  │
+│                                             │
+│       Bs. 25.00                             │
+│       Unit Price                            │
+│                                             │
+│  Cost: Bs. 18.00         Margin: 28%        │
+│                                             │
+│  ─────────────────────────────────────────  │
+│                                             │
+│  Stock: 45 units         ● In Stock         │
+│  Min Level: 10                              │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+**Stock Status Colors:**
+| Status | Color | Message |
+|--------|-------|---------|
+| In Stock | 🟢 Green | "In Stock" |
+| Low Stock | 🟡 Yellow | "Low Stock - Reorder Soon" |
+| Out of Stock | 🔴 Red | "Out of Stock" |
 
 ---
 
@@ -174,11 +263,20 @@ src/
 │   │   ├── SearchResultItem.tsx
 │   │   ├── StockIndicator.tsx
 │   │   └── index.ts
+│   ├── product/                    # NEW (M8)
+│   │   ├── ProductDetailModal.tsx
+│   │   ├── ProductInfo.tsx
+│   │   ├── ProductPricing.tsx
+│   │   ├── ProductStock.tsx
+│   │   └── index.ts
 │   └── ui/
-│       └── Logo.tsx
+│       ├── Logo.tsx
+│       └── Modal.tsx               # NEW (M8)
 ├── hooks/
 │   ├── useProductSearch.ts
-│   └── useDebounce.ts
+│   ├── useDebounce.ts
+│   ├── useProduct.ts               # NEW (M8)
+│   └── useModal.ts                 # NEW (M8)
 ├── lib/
 │   └── api.ts
 ├── pages/
@@ -268,21 +366,35 @@ http://localhost:3000
 
 ## Success Criteria
 
-- [ ] Search returns results in < 300ms
-- [ ] Debounce prevents excessive API calls
-- [ ] Stock indicators show correct colors
+### Phase 1 (Search) ✅
+- [x] Search returns results in < 300ms
+- [x] Debounce prevents excessive API calls
+- [x] Stock indicators show correct colors
+- [x] Responsive on mobile/tablet/desktop
+- [x] Keyboard: Escape closes results
+- [x] Error states handled gracefully
+- [x] Loading spinner shows during fetch
+
+### Phase 2 (Product Modal) ⏳
+- [ ] Modal opens when clicking search result
+- [ ] Modal displays all product information
+- [ ] ESC key closes modal
+- [ ] Click outside closes modal
+- [ ] Loading state while fetching product
+- [ ] Error state if product fetch fails
+- [ ] Profit margin calculated correctly
+- [ ] Stock status colors match design
 - [ ] Responsive on mobile/tablet/desktop
-- [ ] Keyboard: Escape closes results
-- [ ] Error states handled gracefully
-- [ ] Loading spinner shows during fetch
+- [ ] Unit tests for new components
 
 ---
 
-## Next Phase (Out of Scope)
+## Future Phases (Out of Scope)
 
-- Product detail modal/page
 - Category filters
 - Price range filters
 - Search history
 - Barcode scanning
+- Inventory management (add/edit stock)
+- User authentication
 
