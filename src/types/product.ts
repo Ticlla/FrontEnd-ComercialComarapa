@@ -23,8 +23,10 @@ export interface Product {
   name: string;
   description: string | null;
   category_id: string | null;
-  unit_price: number;
-  cost_price: number | null;
+  /** Price as string (PostgreSQL decimal serialization) */
+  unit_price: string;
+  /** Cost price as string or null */
+  cost_price: string | null;
   current_stock: number;
   min_stock_level: number;
   is_active: boolean;

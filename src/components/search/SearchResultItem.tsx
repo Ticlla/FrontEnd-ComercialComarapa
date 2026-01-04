@@ -10,9 +10,11 @@ interface SearchResultItemProps {
 
 /**
  * Format price in Bolivianos (Bs.)
+ * Handles both number and string inputs (backend returns decimal as string)
  */
-function formatPrice(price: number): string {
-  return `Bs. ${price.toFixed(2)}`;
+function formatPrice(price: number | string): string {
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  return `Bs. ${numPrice.toFixed(2)}`;
 }
 
 /**

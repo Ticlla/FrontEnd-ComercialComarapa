@@ -7,3 +7,4 @@ export { SearchResults } from './SearchResults';
 export { SearchResultItem } from './SearchResultItem';
 export { StockIndicator } from './StockIndicator';
 
+
