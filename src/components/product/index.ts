@@ -7,3 +7,4 @@ export { ProductInfo } from './ProductInfo';
 export { ProductPricing } from './ProductPricing';
 export { ProductStock } from './ProductStock';
 
+

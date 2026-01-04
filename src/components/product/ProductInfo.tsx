@@ -40,3 +40,4 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
 export default ProductInfo;
 
+

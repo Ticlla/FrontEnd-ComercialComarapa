@@ -64,3 +64,4 @@ export function StockIndicator({
 export default StockIndicator;
 
 
+

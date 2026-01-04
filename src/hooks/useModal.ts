@@ -51,3 +51,4 @@ export function useModal(initialState = false): UseModalReturn {
 
 export default useModal;
 
+
