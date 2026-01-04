@@ -55,8 +55,8 @@ interface ProductResponse {
   name: string;
   description: string | null;
   category_id: string | null;
-  unit_price: number;
-  cost_price: number | null;
+  unit_price: string;    // PostgreSQL decimal serialized as string
+  cost_price: string | null;  // PostgreSQL decimal serialized as string
   current_stock: number;
   min_stock_level: number;
   is_active: boolean;
@@ -136,13 +136,14 @@ SearchPage
 | M6.6 | Empty/error states |
 | M6.7 | Keyboard navigation (Escape to close) |
 
-### M7: Testing & Integration (Est: 1 hour)
-| Task | Description |
-|------|-------------|
-| M7.1 | Test with backend running |
-| M7.2 | Test responsive behavior |
-| M7.3 | Test edge cases (empty search, no results, errors) |
-| M7.4 | Performance check (debounce working) |
+### M7: Testing & Integration ✅
+| Task | Description | Status |
+|------|-------------|--------|
+| M7.1 | Test with backend running | ✅ |
+| M7.2 | Test responsive behavior | ✅ |
+| M7.3 | Test edge cases (empty search, no results, errors) | ✅ |
+| M7.4 | Performance check (debounce working) | ✅ |
+| M7.5 | Unit tests (44 tests passing) | ✅ |
 
 ---
 
@@ -251,13 +252,36 @@ http://localhost:3000
 
 ## Success Criteria
 
-- [ ] Search returns results in < 300ms
-- [ ] Debounce prevents excessive API calls
-- [ ] Stock indicators show correct colors
-- [ ] Responsive on mobile/tablet/desktop
-- [ ] Keyboard: Escape closes results
-- [ ] Error states handled gracefully
-- [ ] Loading spinner shows during fetch
+- [x] Search returns results in < 300ms
+- [x] Debounce prevents excessive API calls
+- [x] Stock indicators show correct colors
+- [x] Responsive on mobile/tablet/desktop
+- [x] Keyboard: Escape closes results
+- [x] Error states handled gracefully
+- [x] Loading spinner shows during fetch
+
+---
+
+## Implementation Notes
+
+### Issues Discovered & Fixed (Jan 3, 2026)
+
+1. **IPv4/IPv6 Proxy Issue**
+   - Problem: Vite proxy used `localhost` which resolved to IPv6 (`::1`), but backend listens on IPv4
+   - Fix: Changed `vite.config.ts` proxy target from `http://localhost:8000` to `http://127.0.0.1:8000`
+
+2. **Decimal Price Serialization**
+   - Problem: PostgreSQL/Supabase returns decimal fields as strings (e.g., `"10.00"`)
+   - Fix: Updated `Product` type to use `string` for `unit_price` and `cost_price`
+   - Fix: Updated `formatPrice()` to handle both string and number inputs
+
+3. **Duplicate Test File**
+   - Problem: `useProductSearch.test.ts` had JSX but wrong file extension
+   - Fix: Deleted duplicate, kept `useProductSearch.test.tsx`
+
+### Pre-existing ESLint Warnings
+- `SearchBar.tsx`: setState in useEffect (react-hooks/set-state-in-effect)
+- Test files: `@typescript-eslint/no-explicit-any` usage
 
 ---
 
