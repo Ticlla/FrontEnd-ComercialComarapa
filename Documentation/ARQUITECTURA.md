@@ -345,3 +345,4 @@ El sistema maneja las siguientes categorías:
 **Documento mantenido por:** Equipo Comercial Comarapa  
 **Última actualización:** Enero 2026
 
+
