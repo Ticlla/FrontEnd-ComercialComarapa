@@ -1,6 +1,6 @@
 # PRD-002: Product Import from Invoice Images
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Created:** January 6, 2026  
 **Updated:** January 6, 2026  
 **Status:** Draft  
@@ -76,8 +76,8 @@ SO THAT I can correct OCR errors before creating products
 
 ```
 AS A store staff member
-I WANT TO get AI suggestions while typing a product name
-SO THAT I can standardize product names and save time
+I WANT TO get AI suggestions for product name AND description
+SO THAT I can standardize product names and create complete product entries faster
 ```
 
 ---
@@ -224,11 +224,11 @@ SO THAT I can standardize product names and save time
 └────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.5 AI Autocomplete Dropdown
+### 3.5 AI Autocomplete Dropdown (Name + Description)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  Descripción                                                  │
+│  Nombre del producto                                          │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │ Escoba met|                                     [✨ AI] │  │
 │  └────────────────────────────────────────────────────────┘  │
@@ -237,13 +237,19 @@ SO THAT I can standardize product names and save time
 │  └────────────────────────────────────────────────────────┘  │
 │                        ↓                                      │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │ 💡 Sugerencias:                                        │  │
+│  │ 💡 Sugerencias (nombre + descripción):                 │  │
 │  │ ┌────────────────────────────────────────────────────┐ │  │
 │  │ │ Escoba Metálica Industrial                     ← │ │  │
+│  │ │ Escoba de metal resistente para uso industrial,   │ │  │
+│  │ │ mango de acero inoxidable, cerdas duras.          │ │  │
 │  │ ├────────────────────────────────────────────────────┤ │  │
-│  │ │ Escoba Metálica con Mango Telescópico             │ │  │
+│  │ │ Escoba Metálica con Mango Telescópico              │ │  │
+│  │ │ Escoba con mango extensible de 80cm a 140cm,      │ │  │
+│  │ │ ideal para techos y paredes.                      │ │  │
 │  │ ├────────────────────────────────────────────────────┤ │  │
-│  │ │ Escoba Metal Grande para Exteriores               │ │  │
+│  │ │ Escoba Metal Grande para Exteriores                │ │  │
+│  │ │ Escoba reforzada para patios y jardines,          │ │  │
+│  │ │ cerdas resistentes al agua.                       │ │  │
 │  │ └────────────────────────────────────────────────────┘ │  │
 │  │                                                        │  │
 │  │ ↑↓ para navegar • Enter para seleccionar • Esc cerrar │  │
@@ -251,7 +257,9 @@ SO THAT I can standardize product names and save time
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### 3.6 Create Product Modal
+**Nota:** Al seleccionar una sugerencia, se autocompletan AMBOS campos: nombre y descripción.
+
+### 3.6 Create Product Modal (with AI Suggestions)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -259,7 +267,7 @@ SO THAT I can standardize product names and save time
 │  ✕                    CREAR NUEVO PRODUCTO                          │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  Nombre *                                                    │   │
+│  │  Nombre *                                           [✨ AI] │   │
 │  │  [Basurera Max Grande_________________________________]      │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
@@ -272,6 +280,12 @@ SO THAT I can standardize product names and save time
 │  │  Precio Costo        │  │  Precio Venta                      │  │
 │  │  [Bs. 30.00________] │  │  [Bs. 45.00__________]             │  │
 │  └──────────────────────┘  └────────────────────────────────────┘  │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  Descripción                                        [✨ AI] │   │
+│  │  [Basurera de plástico resistente, capacidad 50 litros,  ]  │   │
+│  │  [tapa hermética, ideal para uso doméstico o comercial.  ]  │   │
+│  └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │  Descripción (opcional)                                      │   │
@@ -494,11 +508,11 @@ POST /api/v1/import/match-products
 }
 ```
 
-#### AI Autocomplete Description
+#### AI Autocomplete (Name + Description)
 
 ```typescript
 // Request
-POST /api/v1/import/autocomplete-description
+POST /api/v1/import/autocomplete-product
 
 {
   "partial_text": "Escoba met",
@@ -511,11 +525,26 @@ POST /api/v1/import/autocomplete-description
   "success": true,
   "data": {
     "suggestions": [
-      "Escoba Metálica Industrial",
-      "Escoba Metálica con Mango Telescópico",
-      "Escoba Metal Grande para Exteriores",
-      "Escoba Metálica Reforzada",
-      "Escoba Met. Cerdas Duras"
+      {
+        "name": "Escoba Metálica Industrial",
+        "description": "Escoba de metal resistente para uso industrial, mango de acero inoxidable de 150cm, cerdas duras de polipropileno."
+      },
+      {
+        "name": "Escoba Metálica con Mango Telescópico",
+        "description": "Escoba con mango extensible de 80cm a 140cm, ideal para techos y paredes, base metálica reforzada."
+      },
+      {
+        "name": "Escoba Metal Grande para Exteriores",
+        "description": "Escoba reforzada para patios y jardines, cerdas resistentes al agua, mango de aluminio liviano."
+      },
+      {
+        "name": "Escoba Metálica Reforzada",
+        "description": "Escoba de uso pesado con base de metal cromado, cerdas mixtas para todo tipo de superficies."
+      },
+      {
+        "name": "Escoba Met. Cerdas Duras",
+        "description": "Escoba metálica compacta con cerdas extra duras, ideal para remover suciedad incrustada."
+      }
     ]
   }
 }
@@ -545,7 +574,7 @@ Responde SOLO con JSON válido en este formato:
 }
 `;
 
-// Prompt for autocomplete
+// Prompt for autocomplete (name + description)
 const AUTOCOMPLETE_PROMPT = `
 Eres un asistente para una tienda de artículos variados en Bolivia.
 El usuario está escribiendo el nombre de un producto.
@@ -553,16 +582,28 @@ El usuario está escribiendo el nombre de un producto.
 Texto parcial: "{partial_text}"
 Contexto (si hay): "{context}"
 
-Genera 5 nombres de productos COMPLETOS y PROFESIONALES que podrían 
-coincidir con lo que el usuario está escribiendo.
+Genera 5 sugerencias de productos con NOMBRE y DESCRIPCIÓN.
 
-Reglas:
+Reglas para el NOMBRE:
 - Nombres claros y descriptivos
 - Incluir tamaño/variante si es relevante (Grande, Chico, etc.)
 - Usar español boliviano/latinoamericano
 - NO incluir precios ni códigos
+- Máximo 50 caracteres
 
-Responde SOLO con JSON: {"suggestions": ["nombre1", "nombre2", ...]}
+Reglas para la DESCRIPCIÓN:
+- Descripción útil para el cliente
+- Mencionar material, tamaño, uso principal
+- Entre 50-150 caracteres
+- Tono profesional pero accesible
+
+Responde SOLO con JSON válido:
+{
+  "suggestions": [
+    {"name": "Nombre del Producto", "description": "Descripción útil del producto..."},
+    ...
+  ]
+}
 `;
 ```
 
@@ -794,4 +835,5 @@ Based on provided samples (`productos_1.jpeg` - `productos_14.jpeg`):
 | 1.0 | 2026-01-06 | - | Initial PRD |
 | 1.1 | 2026-01-06 | - | Added inline editing & AI autocomplete features |
 | 1.2 | 2026-01-06 | - | Added multi-image upload & consolidated view |
+| 1.3 | 2026-01-06 | - | AI autocomplete now suggests both name AND description |
 
