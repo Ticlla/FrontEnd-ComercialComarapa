@@ -171,34 +171,46 @@ GEMINI_MODEL=gemini-2.0-flash
 
 ---
 
-## 5. Phase 2: Backend - Matching & Autocomplete (Week 2) 🔜 NEXT
+## 5. Phase 2: Backend - Matching & Autocomplete (Week 2) ✅ COMPLETE
 
 ### 5.1 Tasks
 
 | # | Task | Priority | Estimate | Status |
 |---|------|----------|----------|--------|
-| 2.1 | Improve matching with `search_products_hybrid` (pg_trgm) | High | 3h | ⏳ Pending |
-| 2.2 | Create `POST /api/v1/import/match-products` dedicated endpoint | High | 2h | ⏳ Pending |
+| 2.1 | Improve matching with `search_products_hybrid` (pg_trgm) | High | 3h | ✅ Done |
+| 2.2 | Create `POST /api/v1/import/match-products` dedicated endpoint | High | 2h | ✅ Done |
 | 2.3 | ~~Create `POST /api/v1/import/autocomplete-product` endpoint~~ | High | 3h | ✅ Done in Phase 1 |
 | 2.4 | ~~Create AI prompt for name + description suggestions~~ | High | 2h | ✅ Done in Phase 1 |
-| 2.5 | Improve category matching with database lookup | High | 3h | ⏳ Pending |
-| 2.6 | Create bulk product creation endpoint | Medium | 3h | ⏳ Pending |
-| 2.7 | Write integration tests | Medium | 3h | ⏳ Pending |
-| 2.8 | Performance optimization (caching, batching) | Low | 2h | ⏳ Pending |
+| 2.5 | Improve category matching with Jinja2 prompt templates | High | 3h | ✅ Done |
+| 2.6 | Create bulk product creation endpoint (`POST /api/v1/import/bulk-create`) | Medium | 3h | ✅ Done |
+| 2.7 | Write integration tests | Medium | 3h | ✅ Done |
+| 2.8 | Performance optimization (in-memory caching with TTL) | Low | 2h | ✅ Done |
 
-### 5.2 Files to Create/Modify
+### 5.2 Files Created/Modified
 
 ```
 Backend-ComercialComarapa/
 ├── src/comercial_comarapa/
 │   ├── services/
-│   │   ├── ai_extraction_service.py    # Add autocomplete method
-│   │   └── matching_service.py         # 🆕 Product matching logic
+│   │   ├── ai_extraction_service.py    # ✅ Uses PromptTemplateService
+│   │   └── matching_service.py         # ✅ NEW: DB fuzzy matching with caching
+│   ├── prompts/
+│   │   ├── __init__.py                 # ✅ NEW: Package init
+│   │   ├── template_service.py         # ✅ NEW: Jinja2 prompt rendering
+│   │   └── templates/
+│   │       ├── extraction.j2           # ✅ NEW: Dynamic extraction prompt
+│   │       └── autocomplete.j2         # ✅ NEW: Dynamic autocomplete prompt
 │   ├── api/v1/
-│   │   ├── import_products.py          # Add match & autocomplete
-│   │   └── categories.py               # Verify create endpoint
-│   └── db/repositories/
-│       └── category.py                 # Verify create method
+│   │   └── import_products.py          # ✅ Added match-products, bulk-create endpoints
+│   └── models/
+│       └── import_extraction.py        # ✅ Added bulk creation models
+└── tests/
+    ├── services/
+    │   └── test_matching_service.py    # ✅ NEW: Matching service tests
+    ├── prompts/
+    │   └── test_template_service.py    # ✅ NEW: Template service tests
+    └── api/
+        └── test_import_products.py     # ✅ Added match & bulk create tests
 ```
 
 ### 5.3 Matching Algorithm
