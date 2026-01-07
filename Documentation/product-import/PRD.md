@@ -1,9 +1,9 @@
 # PRD-002: Product Import from Invoice Images
 
-**Version:** 1.5  
+**Version:** 1.6  
 **Created:** January 6, 2026  
 **Updated:** January 7, 2026  
-**Status:** Draft  
+**Status:** In Progress (Phase 1 & 2 Complete)  
 
 ---
 
