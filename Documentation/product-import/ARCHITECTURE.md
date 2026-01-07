@@ -1,20 +1,21 @@
 # Product Import - High-Level Architecture
 
-**Version:** 1.0  
-**Date:** January 6, 2026  
+**Version:** 1.1  
+**Date:** January 7, 2026  
 
 ---
 
 ## 1. Overview
 
-The Product Import feature enables store staff to digitize purchase invoices (notas de venta) by taking photos and automatically extracting product information using artificial intelligence.
+The Product Import feature enables store staff to digitize purchase invoices (notas de venta) by taking photos and automatically extracting product and category information using AI Vision (Gemini Flash).
 
 ```
     📷                    🤖                    📦
   CAPTURE    ─────▶    PROCESS    ─────▶    CATALOG
   
   Photos of           AI extracts          New products
-  invoices            products             added to system
+  invoices            products &           & categories
+  (1-20)              categories           added to system
 ```
 
 ---
@@ -43,10 +44,10 @@ The Product Import feature enables store staff to digitize purchase invoices (no
 | Step | Action | Description |
 |------|--------|-------------|
 | 1 | **Take Photos** | User photographs purchase invoices with phone or camera |
-| 2 | **Upload Images** | Drag & drop or select multiple images in the app |
+| 2 | **Upload Images** | Drag & drop or select multiple images (up to 20) |
 | 3 | **Review Results** | AI extracts products; user sees matches with existing catalog |
-| 4 | **Correct Errors** | Edit any OCR mistakes; use AI suggestions for names |
-| 5 | **Create Products** | Add new products to the catalog with one click |
+| 4 | **Correct Errors** | Edit any AI extraction mistakes; use AI suggestions for names & descriptions |
+| 5 | **Create Items** | Add new products AND categories to the catalog |
 
 ---
 
@@ -86,8 +87,8 @@ The Product Import feature enables store staff to digitize purchase invoices (no
            ┌───────────────┐                     ┌───────────────┐
            │  🤖 AI SERVICE │                     │  🗄️ DATABASE  │
            │               │                     │               │
-           │  Text & Image │                     │   Products    │
-           │  Recognition  │                     │   Catalog     │
+           │  Gemini Flash │                     │   Products    │
+           │  Vision       │                     │   Categories  │
            └───────────────┘                     └───────────────┘
 ```
 
@@ -105,10 +106,11 @@ The Product Import feature enables store staff to digitize purchase invoices (no
                                       │
                                       ▼
                     ┌─────────────────────────────────────────┐
-                    │            AI EXTRACTION                │
+                    │          AI VISION EXTRACTION           │
                     │                                         │
                     │    🤖 Reads handwritten text            │
                     │    📝 Extracts: qty, description, price │
+                    │    🏷️ Suggests category for each item   │
                     │                                         │
                     └─────────────────┬───────────────────────┘
                                       │
@@ -119,6 +121,7 @@ The Product Import feature enables store staff to digitize purchase invoices (no
                     │    🔍 Compares with existing products   │
                     │    ✅ Found → Link to existing          │
                     │    ⚠️ Not found → Mark as new           │
+                    │    🏷️ Identifies missing categories     │
                     │                                         │
                     └─────────────────┬───────────────────────┘
                                       │
@@ -128,7 +131,7 @@ The Product Import feature enables store staff to digitize purchase invoices (no
                     │                                         │
                     │    👤 Verifies extracted data           │
                     │    ✏️ Edits if needed                   │
-                    │    ✨ Gets AI name suggestions          │
+                    │    ✨ Gets AI suggestions (name + desc) │
                     │                                         │
                     └─────────────────┬───────────────────────┘
                                       │
@@ -137,6 +140,7 @@ The Product Import feature enables store staff to digitize purchase invoices (no
                     │              OUTPUT                      │
                     │                                         │
                     │    📦 New products added to catalog     │
+                    │    🏷️ New categories created            │
                     │                                         │
                     └─────────────────────────────────────────┘
 ```
@@ -183,18 +187,35 @@ The Product Import feature enables store staff to digitize purchase invoices (no
 
 **Purpose:** Automatically find existing products that match extracted text, reducing duplicate entries.
 
-### 5.3 AI-Assisted Editing
+### 5.3 AI-Assisted Editing (Name + Description)
 
 ```
-        User types:              AI suggests:
-        ───────────              ────────────
+        User types:              AI suggests (name + description):
+        ───────────              ─────────────────────────────────
         
         "Escoba met..."    ───▶  • Escoba Metálica Industrial
+                                   "Escoba de metal resistente para 
+                                    uso industrial, mango de acero..."
+                                    
                                  • Escoba Metálica Grande
-                                 • Escoba Metal Reforzada
+                                   "Escoba con base metálica reforzada,
+                                    ideal para exteriores..."
 ```
 
-**Purpose:** Help standardize product names with professional suggestions.
+**Purpose:** Help standardize product names AND create professional descriptions automatically.
+
+### 5.4 Category Detection
+
+```
+        Extracted Product           AI Suggests Category
+        ─────────────────           ────────────────────
+        
+        "Mopa colores"        ───▶  🏷️ Limpieza
+        "Gato hidráulico"     ───▶  🏷️ Automotriz  
+        "Clavo 1/2"           ───▶  🏷️ Ferretería
+```
+
+**Purpose:** Automatically categorize products; create new categories if needed.
 
 ---
 
@@ -230,8 +251,8 @@ The Product Import feature enables store staff to digitize purchase invoices (no
 
 **Relationship:**
 - **Product Search** finds existing products
-- **Product Import** adds new products from invoices
-- Both share the same **Product Catalog**
+- **Product Import** adds new products AND categories from invoices
+- Both share the same **Product Catalog** and **Categories**
 
 ---
 
@@ -272,24 +293,29 @@ The Product Import feature enables store staff to digitize purchase invoices (no
 ## 9. Future Expansion
 
 ```
-        Phase 1 (Current)              Future Phases
-        ─────────────────              ──────────────
-        
-        ┌───────────────┐              ┌───────────────┐
-        │               │              │               │
-        │  📷 → 📦      │      ───▶    │  📷 → 📦 → 📊 │
-        │               │              │               │
-        │  Import &     │              │  + Supplier   │
-        │  Create       │              │    tracking   │
-        │  Products     │              │               │
-        │               │              │  + Purchase   │
-        └───────────────┘              │    history    │
-                                       │               │
-                                       │  + Inventory  │
-                                       │    updates    │
-                                       │               │
-                                       └───────────────┘
+     Phase 1 (Current)           Phase 2 (Future)           Phase 3 (Future)
+     ─────────────────           ────────────────           ────────────────
+     
+     ┌───────────────┐           ┌───────────────┐          ┌───────────────┐
+     │               │           │               │          │               │
+     │  📷 → 📦 🏷️   │    ───▶   │  📷 → 📦 🏷️   │   ───▶   │  📷 → 📦 → 📊 │
+     │               │           │               │          │               │
+     │  Import &     │           │  + Invoice    │          │  + Inventory  │
+     │  Create       │           │    storage    │          │    updates    │
+     │  Products &   │           │               │          │               │
+     │  Categories   │           │  + Supplier   │          │  + Purchase   │
+     │               │           │    management │          │    reports    │
+     └───────────────┘           │               │          │               │
+                                 └───────────────┘          └───────────────┘
 ```
+
+### Phase Breakdown
+
+| Phase | Features | Status |
+|-------|----------|--------|
+| **Phase 1** | Products & Categories import, AI extraction, matching | ✅ Current |
+| **Phase 2** | Invoice registration, Supplier management | 🔮 Future |
+| **Phase 3** | Automatic inventory updates, Purchase history & reports | 🔮 Future |
 
 ---
 
@@ -298,4 +324,5 @@ The Product Import feature enables store staff to digitize purchase invoices (no
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-01-06 | Initial architecture overview |
+| 1.1 | 2026-01-07 | Added categories; AI suggestions for name+desc; clarified future phases |
 

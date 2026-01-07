@@ -1,8 +1,8 @@
 # PRD-002: Product Import from Invoice Images
 
-**Version:** 1.3  
+**Version:** 1.5  
 **Created:** January 6, 2026  
-**Updated:** January 6, 2026  
+**Updated:** January 7, 2026  
 **Status:** Draft  
 
 ---
@@ -13,11 +13,14 @@
 
 Comercial Comarapa receives purchase invoices (notas de venta) from suppliers as handwritten paper documents. Currently, there is no efficient way to:
 
-1. Identify which products from invoices are not yet in the catalog
-2. Add new products to the inventory system
-3. Update pricing information from suppliers
+1. Identify which **products** from invoices are not yet in the catalog
+2. Identify which **categories** are missing for new products
+3. Add new products and categories to the inventory system
+4. Update pricing information from suppliers
 
 Staff must manually compare invoices against the system, which is time-consuming and error-prone.
+
+> **Future Scope:** In later phases, the system will also register invoices and suppliers for purchase history tracking.
 
 ### 1.2 Solution
 
@@ -26,15 +29,17 @@ A minimalist interface that allows staff to:
 1. Upload a photo of a purchase invoice
 2. Automatically extract product information using AI (Gemini Flash Vision)
 3. Match extracted products against existing catalog
-4. Easily create new products for items not found
+4. Detect missing categories and suggest new ones
+5. Easily create new products and categories for items not found
 
 ### 1.3 Success Metrics
 
 | Metric | Target |
 |--------|--------|
 | Time to process one invoice | < 2 minutes (vs 10+ min manual) |
-| OCR extraction accuracy | > 85% for handwritten text |
+| AI extraction accuracy | > 85% for handwritten text |
 | New product detection rate | 100% (all unmatched items flagged) |
+| New category detection rate | 100% (all new categories identified) |
 | User adoption | Staff using within first week |
 
 ---
@@ -55,10 +60,13 @@ SO THAT I can quickly identify and add new products to the catalog
 - [ ] System extracts product lines automatically (AI-powered)
 - [ ] Each extracted item shows: quantity, description, unit price
 - [ ] **Can manually edit any extracted field (inline editing)**
-- [ ] **AI autocomplete for product description/name**
+- [ ] **AI autocomplete for product name and description**
 - [ ] System attempts to match with existing products (fuzzy search)
+- [ ] **AI suggests category for each product**
 - [ ] Unmatched products clearly marked as "new"
+- [ ] **Missing categories clearly identified**
 - [ ] Can create new product directly from extracted data
+- [ ] **Can create new category inline if needed**
 - [ ] Can edit extracted data before creating product
 - [ ] **Can navigate between multiple uploaded invoices**
 - [ ] **Consolidated view of all products from all invoices**
@@ -69,7 +77,7 @@ SO THAT I can quickly identify and add new products to the catalog
 ```
 AS A store staff member
 I WANT TO edit the AI-extracted product data
-SO THAT I can correct OCR errors before creating products
+SO THAT I can correct AI extraction errors before creating products
 ```
 
 ### Secondary User Story: AI Autocomplete
@@ -553,7 +561,7 @@ POST /api/v1/import/autocomplete-product
 ### 4.2 AI Integration (Gemini Flash Vision)
 
 ```typescript
-// Prompt for extraction (OCR)
+// Prompt for AI extraction
 const EXTRACTION_PROMPT = `
 Analiza esta imagen de una nota de venta/factura y extrae los productos.
 
@@ -625,8 +633,8 @@ src/
 │       ├── CreateProductModal.tsx    # Modal for new product creation
 │       └── index.ts
 ├── hooks/
-│   ├── useBatchImageExtraction.ts    # 🆕 React Query for batch OCR
-│   ├── useImageExtraction.ts         # React Query mutation for single OCR
+│   ├── useBatchImageExtraction.ts    # 🆕 React Query for batch AI extraction
+│   ├── useImageExtraction.ts         # React Query mutation for single AI extraction
 │   ├── useProductMatching.ts         # Hook for fuzzy matching
 │   ├── useAIAutocomplete.ts          # Hook for AI description suggestions
 │   └── useImportState.ts             # 🆕 State management for multi-invoice
@@ -697,7 +705,7 @@ src/
 
 ---
 
-## 6. AI/OCR Considerations
+## 6. AI Vision Considerations
 
 ### 6.1 Handwriting Challenges
 
@@ -748,17 +756,20 @@ Based on sample invoices analyzed:
 | Screen reader | ARIA labels for upload zone, item status |
 | Focus management | Focus modal on open, return on close |
 | Color contrast | WCAG AA for all text |
-| Alternative input | Manual entry option if OCR fails |
+| Alternative input | Manual entry option if AI extraction fails |
 
 ---
 
 ## 9. Out of Scope (Phase 1)
 
-- [ ] Supplier management/linking
+**Deferred to Future Phases:**
+- [ ] **Invoice registration and storage** (Phase 2)
+- [ ] **Supplier management** (Phase 2)
 - [ ] Purchase history tracking
-- [ ] Automatic stock updates
+- [ ] Automatic stock updates from invoices
 - [ ] Price history tracking
-- [ ] Invoice storage/archival
+
+**Not Planned:**
 - [ ] Offline mode
 - [ ] Mobile camera integration
 - [ ] More than 20 images per batch
@@ -767,21 +778,26 @@ Based on sample invoices analyzed:
 
 ## 10. Implementation Phases
 
-### Phase 2.1: Core Import (This PRD)
-- Image upload with drag & drop
+### Phase 1: Core Import (This PRD) ✅
+- Image upload with drag & drop (multiple images)
 - AI extraction (Gemini Flash)
 - Product matching display
-- Create single product from extracted data
+- Category detection and creation
+- Create products from extracted data
+- AI autocomplete for name + description
 
-### Phase 2.2: Enhanced Matching (Future)
+### Phase 2: Invoice & Supplier Management (Future)
+- **Invoice registration and storage**
+- **Supplier management (CRUD)**
+- Link invoices to suppliers
+
+### Phase 3: Advanced Features (Future)
+- Purchase history tracking
+- Automatic inventory updates from confirmed invoices
 - Batch create multiple products
 - Improved fuzzy matching
 - Learning from user corrections
-
-### Phase 2.3: Full Purchase Flow (Future)
-- Supplier management
-- Purchase history
-- Automatic inventory updates
+- Category auto-suggestion improvements
 
 ---
 
@@ -789,7 +805,7 @@ Based on sample invoices analyzed:
 
 | # | Question | Status |
 |---|----------|--------|
-| 1 | Store original invoice images? | Defer to Phase 2.3 |
+| 1 | Store original invoice images? | Defer to Phase 2 |
 | 2 | Auto-suggest selling price markup? | Yes, default 30% |
 | 3 | Category auto-detection from AI? | Try it, fallback to manual |
 | 4 | Limit extraction to N items? | 50 items max per invoice |
@@ -836,4 +852,6 @@ Based on provided samples (`productos_1.jpeg` - `productos_14.jpeg`):
 | 1.1 | 2026-01-06 | - | Added inline editing & AI autocomplete features |
 | 1.2 | 2026-01-06 | - | Added multi-image upload & consolidated view |
 | 1.3 | 2026-01-06 | - | AI autocomplete now suggests both name AND description |
+| 1.4 | 2026-01-07 | - | Added category detection; clarified future scope (invoices & suppliers) |
+| 1.5 | 2026-01-07 | - | Aligned phase numbering with ARCHITECTURE.md (Phase 1, 2, 3 instead of 2.1, 2.2, 2.3) |
 
