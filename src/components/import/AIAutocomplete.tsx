@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
-import { autocompleteProduct } from '../../services/import';
+import { getAutocompleteSuggestions } from '../../services/import';
 import type { AutocompleteSuggestion } from '../../types/import';
 
 // =============================================================================
@@ -56,8 +56,8 @@ export function AIAutocomplete({
       setError(null);
 
       try {
-        const response = await autocompleteProduct({
-          partial_text: debouncedValue,
+        const response = await getAutocompleteSuggestions({
+          partialText: debouncedValue,
           context: context || undefined,
         });
         setSuggestions(response.suggestions);
