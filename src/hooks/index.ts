@@ -9,4 +9,8 @@ export { useModal } from './useModal';
 export type { UseModalReturn } from './useModal';
 export { useProduct } from './useProduct';
 export type { UseProductResult } from './useProduct';
+export { useImportState, toEditableProduct } from './useImportState';
+export type { UseImportStateReturn } from './useImportState';
+export { useBatchExtraction } from './useBatchExtraction';
+export type { UseBatchExtractionReturn } from './useBatchExtraction';
 

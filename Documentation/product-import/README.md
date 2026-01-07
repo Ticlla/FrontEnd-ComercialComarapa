@@ -7,7 +7,7 @@ This folder contains all documentation related to the **Product Import** feature
 | File | Description |
 |------|-------------|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | High-level architecture overview |
-| [PRD.md](./PRD.md) | Product Requirements Document (v1.5) |
+| [PRD.md](./PRD.md) | Product Requirements Document (v1.6) |
 | [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) | Technical implementation plan (4 weeks) |
 
 ## Feature Overview
@@ -44,8 +44,23 @@ This folder contains all documentation related to the **Product Import** feature
 |-------|-------------|--------|
 | Phase 1 | Backend AI Extraction Service | ✅ Complete |
 | Phase 2 | Backend Matching & Autocomplete | ✅ Complete |
-| Phase 3 | Frontend UI Implementation | 🔜 Next |
+| Phase 3 | Frontend UI Implementation | 🚧 In Progress |
 | Phase 4 | Integration & Testing | ⏳ Pending |
+
+### Frontend Components (Phase 3)
+
+| Component | Description | Status |
+|-----------|-------------|--------|
+| `ImportPage` | Main import page with workflow | ✅ |
+| `MultiImageUploader` | Drag & drop image uploader | ✅ |
+| `ProcessingIndicator` | AI processing progress UI | ✅ |
+| `ExtractedItemsList` | Product list with stats | ✅ |
+| `ExtractedItem` | Single product component | ✅ |
+| `ImageThumbnails` | Thumbnail navigation | 🔜 |
+| `ExtractedItemEditor` | Inline edit panel | 🔜 |
+| `AIAutocomplete` | AI suggestions dropdown | 🔜 |
+| `ConsolidatedView` | All products table | 🔜 |
+| `CreateProductModal` | New product form | 🔜 |
 
 ### Backend Endpoints
 
@@ -80,6 +95,23 @@ Backend-ComercialComarapa/src/comercial_comarapa/
 │       ├── extraction.j2           # AI extraction prompt
 │       └── autocomplete.j2         # AI autocomplete prompt
 └── models/import_extraction.py     # Pydantic models
+```
+
+### Frontend Files (Phase 3)
+
+```
+FrontEnd-ComercialComarapa/src/
+├── pages/ImportPage.tsx            # Main import page
+├── components/import/
+│   ├── MultiImageUploader.tsx      # Drag & drop uploader
+│   ├── ProcessingIndicator.tsx     # AI progress UI
+│   ├── ExtractedItemsList.tsx      # Product list
+│   └── ExtractedItem.tsx           # Single product item
+├── hooks/
+│   ├── useImportState.ts           # Import workflow state
+│   └── useBatchExtraction.ts       # Batch extraction hook
+├── services/import.ts              # Import API calls
+└── types/import.ts                 # TypeScript types
 ```
 
 ## Related Documents
