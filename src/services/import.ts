@@ -230,3 +230,6 @@ export function validateImageFiles(files: File[]): ImageValidationResult {
   return { valid: true };
 }
 
+
+
+

@@ -41,9 +41,9 @@ export function SearchPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
+    <div className="h-full bg-[var(--color-bg)] flex flex-col">
       {/* Main Content - Centered */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 -mt-20">
+      <main className="flex-1 flex flex-col items-center justify-center px-4">
         {/* Logo */}
         <div className="mb-8">
           <Logo size="lg" />

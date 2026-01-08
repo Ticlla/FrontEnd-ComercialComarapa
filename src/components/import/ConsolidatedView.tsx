@@ -109,7 +109,7 @@ export function ConsolidatedView({
 
                 {/* Unit Price */}
                 <td className="px-4 py-3 text-right">
-                  Bs. {extracted.unit_price.toFixed(2)}
+                  Bs. {Number(extracted.unit_price).toFixed(2)}
                 </td>
 
                 {/* Status */}
@@ -152,4 +152,5 @@ export function ConsolidatedView({
     </div>
   );
 }
+
 

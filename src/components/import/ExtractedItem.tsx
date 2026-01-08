@@ -98,7 +98,7 @@ export function ExtractedItem({
             <span className="font-medium">{extracted.quantity}</span> unid.
           </span>
           <span>
-            Bs. <span className="font-medium">{extracted.unit_price.toFixed(2)}</span>
+            Bs. <span className="font-medium">{Number(extracted.unit_price).toFixed(2)}</span>
           </span>
           {extracted.suggested_category && (
             <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">
@@ -142,4 +142,5 @@ export function ExtractedItem({
     </div>
   );
 }
+
 

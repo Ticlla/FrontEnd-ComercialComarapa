@@ -72,7 +72,7 @@ function App() {
         <BrowserRouter>
           <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navigation />
-            <main className="flex-1">
+            <main className="flex-1 flex flex-col">
               <Routes>
                 <Route path="/" element={<SearchPage />} />
                 <Route path="/import" element={<ImportPage />} />

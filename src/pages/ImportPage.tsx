@@ -173,10 +173,15 @@ export function ImportPage() {
 
       if (response.total_failed > 0) {
         setError(`Se crearon ${response.total_created} productos. ${response.total_failed} fallaron.`);
+        setStep('review');
+      } else {
+        // Success! Show success message and reset
+        alert(`✅ ${response.total_created} producto(s) creado(s) exitosamente!`);
+        reset();
       }
-      // Could navigate to success page or show summary
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear productos');
+      setStep('review');
     } finally {
       setIsCreating(false);
     }
