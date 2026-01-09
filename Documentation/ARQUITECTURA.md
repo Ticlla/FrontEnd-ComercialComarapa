@@ -1,8 +1,9 @@
 # Arquitectura del Sistema - Comercial Comarapa
 
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Fecha:** Enero 2026  
-**Estado:** Documentación de Alto Nivel
+**Estado:** Documentación de Alto Nivel  
+**Última actualización:** Enero 9, 2026 - Añadida funcionalidad de Importación IA
 
 ---
 
@@ -22,7 +23,13 @@ Comercial Comarapa es un sistema de gestión de inventario diseñado para tienda
 │   ┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐  │
 │   │    FRONTEND      │ ───► │     BACKEND      │ ───► │   BASE DE DATOS  │  │
 │   │  (Interfaz Web)  │ ◄─── │   (API REST)     │ ◄─── │   (PostgreSQL)   │  │
-│   └──────────────────┘      └──────────────────┘      └──────────────────┘  │
+│   └──────────────────┘      └────────┬─────────┘      └──────────────────┘  │
+│                                      │                                       │
+│                                      ▼                                       │
+│                             ┌──────────────────┐                             │
+│                             │   GOOGLE GEMINI  │                             │
+│                             │   (IA Vision)    │                             │
+│                             └──────────────────┘                             │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -46,7 +53,9 @@ Comercial Comarapa es un sistema de gestión de inventario diseñado para tienda
 │   │ • Búsqueda  │   │ • Barra de  │   │ • Conexión  │           │
 │   │ • Detalles  │   │   búsqueda  │   │   con API   │           │
 │   │   producto  │   │ • Resultados│   │ • Caché de  │           │
-│   │             │   │ • Modales   │   │   datos     │           │
+│   │ • Importar  │   │ • Modales   │   │   datos     │           │
+│   │   facturas  │   │ • Upload    │   │ • Import    │           │
+│   │             │   │   imágenes  │   │   Service   │           │
 │   └─────────────┘   └─────────────┘   └─────────────┘           │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -58,6 +67,7 @@ Comercial Comarapa es un sistema de gestión de inventario diseñado para tienda
 - 📊 Indicadores de stock (disponible, bajo, agotado)
 - 💰 Información de precios y márgenes
 - ⌨️ Navegación por teclado
+- 🤖 Importación de facturas con IA (extracción automática de productos)
 
 ---
 
@@ -78,7 +88,20 @@ Comercial Comarapa es un sistema de gestión de inventario diseñado para tienda
 │   │ • Categorías│   │   híbrida   │   │ • CRUD      │           │
 │   │ • Inventario│   │ • Validación│   │ • Caché     │           │
 │   │ • Ventas    │   │ • Cálculos  │   │             │           │
+│   │ • Import IA │   │ • Extracción│   │             │           │
 │   └─────────────┘   └─────────────┘   └─────────────┘           │
+│                            │                                     │
+│                            ▼                                     │
+│                   ┌─────────────────┐                            │
+│                   │  GOOGLE GEMINI  │                            │
+│                   │  (Vision API)   │                            │
+│                   │                 │                            │
+│                   │ • Procesa       │                            │
+│                   │   imágenes      │                            │
+│                   │ • Extrae texto  │                            │
+│                   │ • Interpreta    │                            │
+│                   │   productos     │                            │
+│                   └─────────────────┘                            │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -89,6 +112,7 @@ Comercial Comarapa es un sistema de gestión de inventario diseñado para tienda
 - 📦 Control de inventario
 - 💵 Registro de ventas
 - 📈 Alertas de stock bajo
+- 🤖 Extracción IA de facturas manuscritas (Google Gemini Vision)
 
 ---
 
@@ -186,6 +210,58 @@ Comercial Comarapa es un sistema de gestión de inventario diseñado para tienda
 
 ---
 
+### 3.3 Importación de Productos con IA
+
+```
+┌─────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Usuario │────►│ Frontend │────►│ Backend  │────►│  Google  │────►│ Backend  │
+│  sube   │     │ convierte│     │ envía a  │     │  Gemini  │     │ procesa  │
+│ imagen  │     │ a Base64 │     │   IA     │     │ extrae   │     │ respuesta│
+└─────────┘     └──────────┘     └──────────┘     └──────────┘     └──────────┘
+                     │                                                   │
+                     │◄──────────────────────────────────────────────────┘
+                     │        Productos extraídos
+                     ▼
+              ┌──────────────┐
+              │   Preview    │
+              │   muestra:   │
+              │ • Productos  │
+              │   detectados │
+              │ • Cantidades │
+              │ • Precios    │
+              │ • Categorías │
+              │   sugeridas  │
+              └──────────────┘
+                     │
+                     ▼
+              ┌──────────────┐
+              │   Usuario    │
+              │   confirma   │
+              │   o edita    │
+              │   productos  │
+              └──────────────┘
+```
+
+**Flujo detallado:**
+1. El usuario sube una o más imágenes de facturas manuscritas
+2. El frontend convierte las imágenes a Base64
+3. Se envía al endpoint `/api/v1/import/extract-preview`
+4. El backend envía la imagen a Google Gemini Vision
+5. Gemini interpreta la escritura a mano y extrae productos
+6. El backend procesa la respuesta y valida los datos
+7. El frontend muestra un preview con los productos detectados
+8. El usuario puede editar, confirmar o descartar productos
+9. Al confirmar, se crean los productos/entradas de inventario
+
+**Características de la IA:**
+- 📷 Procesa imágenes de facturas manuscritas
+- ✍️ Interpreta escritura a mano ilegible
+- 🔧 Corrige errores de lectura automáticamente
+- 📁 Sugiere categorías basadas en el producto
+- 🔗 Empareja con productos existentes del catálogo
+
+---
+
 ## 4. Usuarios del Sistema
 
 ### 4.1 Empleado de Tienda (Usuario Principal)
@@ -234,6 +310,40 @@ Comercial Comarapa es un sistema de gestión de inventario diseñado para tienda
 | 💰 Precio de venta | Lo que paga el cliente |
 | 📉 Precio de costo | Lo que pagó la tienda |
 | 📈 Margen de ganancia | Diferencia entre venta y costo |
+
+### 5.4 Importación con IA 🤖
+
+| Característica | Descripción |
+|----------------|-------------|
+| 📷 Subir imágenes | Arrastra o selecciona fotos de facturas |
+| ✨ Extracción automática | IA lee y extrae productos de la imagen |
+| ✍️ Interpretación inteligente | Corrige errores de escritura a mano |
+| 📋 Preview editable | Revisa y ajusta antes de confirmar |
+| 🔗 Emparejamiento | Detecta productos existentes en catálogo |
+| 📁 Categorización | Sugiere categorías automáticamente |
+
+**Ejemplos de corrección inteligente:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           CORRECCIÓN AUTOMÁTICA DE ESCRITURA                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   Texto manuscrito        →    Producto detectado               │
+│   ─────────────────────────────────────────────────             │
+│                                                                  │
+│   "Gu hidraustice"        →    Gato Hidráulico                  │
+│   "Aceite 10w40"          →    Aceite de Motor 10W-40           │
+│   "Camara GRIS"           →    Cámara de Llanta Gris            │
+│   "Borne Pl"              →    Borne de Batería Plomo           │
+│   "Silicona spry"         →    Silicona en Spray                │
+│                                                                  │
+│   La IA usa el contexto del proveedor para interpretar:         │
+│   "LUBRICANTES" → productos automotrices                        │
+│   "FERRETERÍA"  → herramientas y materiales                     │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -291,20 +401,21 @@ El sistema maneja las siguientes categorías:
     │  │                       👤                             │   │
     │  └───────────────────────┬─────────────────────────────┘   │
     │                          │                                  │
-    │                          ▼                                  │
-    │  ┌─────────────────────────────────────────────────────┐   │
-    │  │              INTERFAZ DE BÚSQUEDA                    │   │
-    │  │         ┌──────────────────────────┐                 │   │
-    │  │         │  🔍 Buscar productos...  │                 │   │
-    │  │         └──────────────────────────┘                 │   │
-    │  └───────────────────────┬─────────────────────────────┘   │
-    │                          │                                  │
     │            ┌─────────────┼─────────────┐                   │
-    │            ▼             ▼             ▼                   │
-    │     ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-    │     │ Ver      │  │ Consultar│  │ Verificar│              │
-    │     │ precio   │  │ detalles │  │ stock    │              │
-    │     └──────────┘  └──────────┘  └──────────┘              │
+    │            ▼                           ▼                   │
+    │  ┌─────────────────────┐     ┌─────────────────────┐      │
+    │  │  INTERFAZ BÚSQUEDA  │     │  IMPORTAR FACTURAS  │      │
+    │  │ ┌─────────────────┐ │     │ ┌─────────────────┐ │      │
+    │  │ │🔍 Buscar...     │ │     │ │📷 Subir imagen  │ │      │
+    │  │ └─────────────────┘ │     │ └─────────────────┘ │      │
+    │  └──────────┬──────────┘     └──────────┬──────────┘      │
+    │             │                           │                  │
+    │     ┌───────┼───────┐           ┌───────┼───────┐         │
+    │     ▼       ▼       ▼           ▼       ▼       ▼         │
+    │  ┌──────┐┌──────┐┌──────┐   ┌──────┐┌──────┐┌──────┐     │
+    │  │ Ver  ││Consul││Verif.│   │ IA   ││Preview││Confir│     │
+    │  │precio││detalles│stock │   │extrae││editar││ mar  │     │
+    │  └──────┘└──────┘└──────┘   └──────┘└──────┘└──────┘     │
     │                                                             │
     └─────────────────────────────────────────────────────────────┘
 ```
@@ -320,15 +431,24 @@ El sistema maneja las siguientes categorías:
 | 📱 **Accesibilidad** | Funciona en computadoras y tablets |
 | 🔄 **Actualización** | Datos siempre actualizados |
 | 📊 **Visibilidad** | Stock bajo claramente identificado |
+| 🤖 **Automatización** | Importación de facturas con IA elimina entrada manual |
 
 ---
 
 ## 10. Próximas Funcionalidades (Roadmap)
 
-### Fase Actual ✅
+### Fase 1 ✅ (Completada)
 - Búsqueda de productos
 - Visualización de detalles
 - Indicadores de stock
+
+### Fase 2 ✅ (Completada)
+- Gestión de inventario
+- Entradas, salidas y ajustes
+- **Importación con IA** (Google Gemini Vision)
+  - Extracción de facturas manuscritas
+  - Interpretación inteligente de escritura
+  - Preview y edición de productos
 
 ### Próxima Fase 🔜
 - Registro de ventas
